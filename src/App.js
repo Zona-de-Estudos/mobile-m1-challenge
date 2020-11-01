@@ -18,21 +18,22 @@ export default function App() {
     api.get("repositories")
       .then(response => setRepositories(response.data))
       .catch(err => console.error(err))
-  })
+  }, [])
 
-  async function handleLikeRepository(id) {
-    try{
-      const response = await api.post(`repositories/${id}/like`)
+  function handleLikeRepository(id) {
+    api.post(`repositories/${id}/like`)
+    .then(response => {
       const repositoryLiked = response.data;
-      const repositoryArray = repositories;
-      const repositoryIndex = repositoryArray.findIndex(repository => repository.id === repositoryLiked.id);
+      
+      const repositoriesUpdated = repositories.map(repository => {
+        if(repository.id === repositoryLiked.id) return repositoryLiked;
 
-      repositoryArray.splice(repositoryIndex, 1, repositoryLiked);
+        return repository
+      })
 
-      setRepositories(repositoryArray);
-    }catch(err){
-      console.error(err)
-    }
+      return setRepositories(repositoriesUpdated);
+    })
+    .catch(err => console.error(err));
   }
 
   return (
@@ -56,7 +57,7 @@ export default function App() {
                   // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
                   testID={`repository-likes-${item.id}`}
                 >
-                  {item.likes}
+                  {item.likes} curtidas
                 </Text>
               </View>
 
